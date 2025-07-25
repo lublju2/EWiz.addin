@@ -17,7 +17,7 @@ How‑To:
 
 Note: If you need more than one sheet, split the Excel file into two and run the script separately in two Drafting Views.
 ========================================
-Author: PBM"""
+Author: PDM"""
 
 import clr
 import sys
