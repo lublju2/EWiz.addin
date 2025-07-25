@@ -160,16 +160,47 @@ class RevisedSheet(object):
         return len(self._rev_ids)
 
     def get_drawing_number(self):
-        """Construct drawing number from project and sheet parameters."""
+        """Construct drawing number from project and sheet parameters in the correct order."""
         proj_info = doc.ProjectInformation
-        proj_fields = ['Project Number', 'EWP_Project_Originator Code', 'EWP_Project_Role Code']
-        parts = [proj_info.LookupParameter(name).AsString().strip()
-                 for name in proj_fields if proj_info.LookupParameter(name)]
-        sheet_fields = ['EWP_Sheet_Zone Code', 'EWP_Sheet_Level Code',
-                        'EWP_Sheet_Type Code', 'Sheet Number']
-        parts += [self._sheet.LookupParameter(name).AsString().strip()
-                  for name in sheet_fields if self._sheet.LookupParameter(name)]
-        return "-".join(filter(None, parts))
+        parts = []
+
+        # 1. Project Number
+        param = proj_info.LookupParameter('Project Number')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
+
+        # 2. EWP_Project_Originator Code
+        param = proj_info.LookupParameter('EWP_Project_Originator Code')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
+
+        # 3–5. Sheet zone, level и type
+        for name in ['EWP_Sheet_Zone Code', 'EWP_Sheet_Level Code', 'EWP_Sheet_Type Code']:
+            param = self._sheet.LookupParameter(name)
+            if param:
+                val = param.AsString()
+                if val:
+                    parts.append(val.strip())
+
+        # 6. EWP_Project_Role Code
+        param = proj_info.LookupParameter('EWP_Project_Role Code')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
+
+        # 7. Sheet Number
+        param = self._sheet.LookupParameter('Sheet Number')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
+
+        return "-".join(parts)
 
 # -- Filter valid sheets for the revision report --
 revised_sheets = []
@@ -182,7 +213,7 @@ for s in all_sheets:
         revised_sheets.append(rs)
 
 # -- Prepare Excel report --
-template_path = r"I:\\BLU - Service Delivery\\04 Building Information Management\\07 The Button\\Project No_Issue Sheets\\Document Issue Sheet.xlsx"
+template_path = r"I:\\BLU - Service Delivery\\04 Building Information Management\\07 EWiz\\Document Issue Sheet.xlsx"
 save_path = save_file_dialog(os.path.dirname(template_path))
 if not save_path:
     sys.exit()
@@ -199,7 +230,7 @@ wb = excel.Workbooks.Open(save_path)
 for sheet_idx in range(1, wb.Sheets.Count + 1):
     ws = wb.Sheets.Item[sheet_idx]
     for idx, (_n, date_str, _c) in enumerate(rev_data):
-        d, m, y = [int(x) for x in re.findall(r'\\d+', date_str)]
+        d, m, y = [int(x) for x in re.findall(r'\d+', date_str)]
         col = excel_col_name(3 + idx)
         ws.Range[col + "6"].Value2 = d
         ws.Range[col + "7"].Value2 = m

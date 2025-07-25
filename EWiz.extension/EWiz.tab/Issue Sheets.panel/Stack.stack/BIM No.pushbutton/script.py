@@ -157,33 +157,58 @@ class RevisedSheet(object):
         return len(self._rev_ids)
 
     def get_drawing_number(self):
-        """Construct drawing number from project and sheet parameters."""
+        """Construct drawing number from project and sheet parameters in the correct order."""
         proj_info = doc.ProjectInformation
-        proj_fields = [
-            'EWP_Project_BIM Number',
-            'EWP_Project_Originator Code',
-            'EWP_Project_Role Code'
-        ]
         parts = []
-        for name in proj_fields:
-            param = proj_info.LookupParameter(name)
-            if param:
-                value = param.AsString()
-                if value:
-                    parts.append(value.strip())
 
-        sheet_fields = [
-            'EWP_Sheet_Zone Code',
-            'EWP_Sheet_Level Code',
-            'EWP_Sheet_Type Code',
-            'Sheet Number'
-        ]
-        for name in sheet_fields:
-            param = self._sheet.LookupParameter(name)
-            if param:
-                value = param.AsString()
-                if value:
-                    parts.append(value.strip())
+        # 1. EWP_Project_BIM Number
+        param = proj_info.LookupParameter('EWP_Project_BIM Number')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
+
+        # 2. EWP_Project_Originator Code
+        param = proj_info.LookupParameter('EWP_Project_Originator Code')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
+
+        # 3. EWP_Sheet_Zone Code
+        param = self._sheet.LookupParameter('EWP_Sheet_Zone Code')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
+
+        # 4. EWP_Sheet_Level Code
+        param = self._sheet.LookupParameter('EWP_Sheet_Level Code')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
+
+        # 5. EWP_Sheet_Type Code
+        param = self._sheet.LookupParameter('EWP_Sheet_Type Code')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
+
+        # 6. EWP_Project_Role Code
+        param = proj_info.LookupParameter('EWP_Project_Role Code')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
+
+        # 7. Sheet Number
+        param = self._sheet.LookupParameter('Sheet Number')
+        if param:
+            val = param.AsString()
+            if val:
+                parts.append(val.strip())
 
         return "-".join(parts)
 
@@ -198,7 +223,7 @@ for s in all_sheets:
         revised_sheets.append(rs)
 
 # -- Prepare Excel report --
-template_path = r"I:\BLU - Service Delivery\04 Building Information Management\07 The Button\BIM_No_Issue_Sheets\Document Issue Sheet.xlsx"
+template_path = r"I:\\BLU - Service Delivery\\04 Building Information Management\\07 EWiz\\Document Issue Sheet.xlsx"
 save_path = save_file_dialog(os.path.dirname(template_path))
 if not save_path:
     sys.exit()
