@@ -182,7 +182,7 @@ def protect_abbrev(text):
 
 
 def restore_abbrev(text):
-    """Reverse :func:`protect_abbrev`."""
+    """Reverse :func:protect_abbrev."""
     return text.replace(_ABBR_SAFE_DOT, u'.')
 
 # -----------------------------------------------------------------------------
@@ -392,6 +392,11 @@ class ExceptionApplier(object):
 def convert_text_note_text(text, applier):
     """Convert one note, return (new_text, change_pairs)."""
     text      = protect_abbrev(text)
+    text = re.sub(
+        r'(?<=\d)\.\s*([A-Za-z])',
+        lambda m: '. ' + m.group(1).upper(),
+        text
+    )
     out_lines, changes = [], []
 
     for line in text.splitlines(True):
